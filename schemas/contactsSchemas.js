@@ -1,5 +1,36 @@
 import Joi from "joi";
 
+import { Schema,model } from "mongoose";
+
+
+ const contactSchema = Schema(
+    {
+        name: {
+            type: String,
+            required: [true, 'Set name for contact'],
+            min: [3, 'Too short name'],
+          },
+          email: {
+            type: String,
+            required: true,
+          },
+          phone: {
+            type: String,
+            required: true,
+          },
+          favorite: {
+            type: Boolean,
+            default: false,
+          },
+    },
+    { versionKey: false, timestamps: true },
+);
+
+
+
+export const Contact = model ('contact', contactSchema);
+
+
 export const createContactSchema = Joi.object({
 
 name:Joi.string().min(2).max(30).required(),
@@ -12,9 +43,9 @@ export const updateContactSchema = Joi.object({
     email: Joi.string().email({allowFullyQualified:true,minDomainSegments:1}).optional(),
     phone:Joi.string().optional(),
 })
-
-
-// id: Date.now().toString(), // Унікальний ID для нового контакту
-// name,
-// email,
-// phone,
+// Схема валидации обновления статуса контакта
+export const schemaUpdateContactStatus = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+// enum: ["sale", "stock", "promocode"], один из многих
+// match: codeRegexp регулярное выражегие

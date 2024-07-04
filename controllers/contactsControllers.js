@@ -25,15 +25,15 @@ export const deleteContact = async (req, res) => {
     if(!deleteContact ) {
         throw HttpError (404, 'Not found ')
     }
-    res.status(200).json({deletedContact,status: 'success'})
+    res.status(200).json({deletedContact,status: 'success'});
 
 };
 
 export const createContact = async (req, res) => {
-    const {name,email,phone} = req.body;
+
 
    
-    const newContact= await contactsService.addContact(name,email,phone);
+    const newContact= await contactsService.addContact(req.body);
     if(!newContact){
         throw HttpError (400);
     }
@@ -48,6 +48,19 @@ export const updateContact = async(req, res) => {
         throw HttpError(400, 'Body must have at least one field');
     }
     const result= await contactsService.updateContactById(id,req.body);
+    if(!result) {
+        throw HttpError(400);
+    }
+    res.status(200).json({  result,status: 'success'})
+    
+};
+export const uupdateFavorite = async(req, res) => {
+    const {id}=req.params;
+   
+    if(!req.body){
+        throw HttpError(400, 'Body must have field favorit');
+    }
+    const result= await contactsService.updateFavorittById(id,req.body);
     if(!result) {
         throw HttpError(400);
     }
