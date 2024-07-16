@@ -1,3 +1,3 @@
-import * as contactsService  from './contactsServices.js'
+import * as contactsService  from './contactsServices.js';
 
 export default contactsService;

@@ -1,7 +1,8 @@
 import Joi from "joi";
 
 import { Schema,model } from "mongoose";
-import {handleMongooseError} from '../services/middlewares/handleMongooseError.js'
+
+import handleMongooseError from '../middlewares/handleMongooseError.js'
 
 
  const contactSchema = Schema(
@@ -23,6 +24,11 @@ import {handleMongooseError} from '../services/middlewares/handleMongooseError.j
             type: Boolean,
             default: false,
           },
+          owner: {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+            required: true,
+        }
     },
     { versionKey: false, timestamps: true },
 );
