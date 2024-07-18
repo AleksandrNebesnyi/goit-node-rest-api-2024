@@ -1,12 +1,12 @@
-import contactsService from '../services/index.js';
+import contactsService from '../services/contactsServices.js';
 import HttpError from '../helpers/HttpError.js';
 
-export const getAllContacts = async (req, res) => {
+const getAllContacts = async (req, res) => {
   const contacts = await contactsService.listContacts(req);
   res.status(200).json({ contacts, status: 'success' });
 };
 
-export const getOneContact = async (req, res) => {
+const getOneContact = async (req, res) => {
   const contact = await contactsService.getContactById(req);
   if (!contact) {
     throw HttpError(404, 'Not found ');
@@ -14,7 +14,7 @@ export const getOneContact = async (req, res) => {
   res.status(200).json({ contact, status: 'success' });
 };
 
-export const createContact = async (req, res) => {
+const createContact = async (req, res) => {
   const newContact = await contactsService.addContact(req);
   if (!newContact) {
     throw HttpError(400);
@@ -23,7 +23,7 @@ export const createContact = async (req, res) => {
   res.status(201).json({ newContact, status: 'success' });
 };
 
-export const updateContact = async (req, res) => {
+const updateContact = async (req, res) => {
   const { id } = req.params;
 
   if (!req.body) {
@@ -42,7 +42,7 @@ export const updateContact = async (req, res) => {
   res.status(200).json({ result, status: 'success' });
 };
 
-export const uupdateFavorite = async (req, res) => {
+const updateFavorite = async (req, res) => {
   const { id } = req.params;
 
   if (!req.body) {
@@ -58,7 +58,7 @@ export const uupdateFavorite = async (req, res) => {
   res.status(200).json({ result, status: 'success' });
 };
 
-export const deleteContact = async (req, res) => {
+const deleteContact = async (req, res) => {
   const { id } = req.params;
   const deletedContact =
     await contactsService.removeContact(id, req);
@@ -68,4 +68,13 @@ export const deleteContact = async (req, res) => {
   res
     .status(200)
     .json({ deletedContact, status: 'success' });
+};
+
+export default {
+  getAllContacts,
+  getOneContact,
+  createContact,
+  updateContact,
+  updateFavorite,
+  deleteContact,
 };
