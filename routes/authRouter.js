@@ -2,6 +2,7 @@ import express from 'express';
 import validateBody from '../middlewares/validateBody.js';
 import {
   registerSchema,
+  emailSchema,
   loginSchema,
   subscriptionShema,
 } from '../schemas/usersSchemas.js';
@@ -17,11 +18,24 @@ authRouter.post(
   validateBody(registerSchema),
   ctrlWrapper(authControllers.registerUser)
 );
+
+authRouter.get(
+  '/verify/:verificationToken',
+  authControllers.verifyUser
+);
+
+authRouter.post(
+  '/verify',
+  validateBody(emailSchema),
+  authControllers.resendVerifyEmail
+);
+
 authRouter.post(
   '/login',
   validateBody(loginSchema),
   ctrlWrapper(authControllers.loginUser)
 );
+
 authRouter.post(
   '/current',
   authenticate,

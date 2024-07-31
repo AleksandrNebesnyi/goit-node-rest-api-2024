@@ -2,10 +2,16 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../schemas/usersSchemas.js';
 import HttpError from '../helpers/HttpError.js';
+import sendEmail from '../helpers/sendEmail.js';
 import gravatar from 'gravatar';
 import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+
+import dotenv from 'dotenv';
+
+// Завантаження змінних середовища з файлу .env
+dotenv.config();
 
 // Setup __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +27,7 @@ const avatarsDir = join(
 
 const { sign } = jwt;
 const { hash } = bcrypt;
+const { BASE_URL } = process.env;
 
 // Register User
 const register = async requestBody => {
@@ -31,13 +38,54 @@ const register = async requestBody => {
   }
   const hashPassword = await hash(password, 10);
   const avatarUrl = gravatar.url(email);
-  return await User.create({
+  const verificationToken = nanoid();
+  const newUser = await User.create({
     ...requestBody,
     password: hashPassword,
     avatarUrl,
+    verificationToken,
+  });
+  const verifyEmail = {
+    to: email,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click verify email</a>`,
+  };
+  await sendEmail(verifyEmail);
+  return newUser;
+};
+
+// verify  User
+const verify = async requestParams => {
+  const { verificationToken } = requestParams;
+  const user = await findOne({ verificationToken });
+  if (!user) {
+    throw new HttpError(404, 'User not found');
+  }
+  return await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: null,
   });
 };
 
+const resendEmail = async email => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new HttpError(401, 'Email not found');
+  }
+  if (user.verify) {
+    throw new HttpError(
+      400,
+      'Verification has already been passed'
+    );
+  }
+  const verifyEmail = {
+    to: email,
+    subject: 'Verify email',
+    html: `<a target="_blank" href="${BASE_URL}/api/auth/verify/${user.verificationToken}">Click verify email</a>`,
+  };
+  await sendEmail(verifyEmail);
+  return user;
+};
 // Login User
 const login = async requestBody => {
   const { email, password } = requestBody;
@@ -123,6 +171,8 @@ const updateAvatar = async req => {
 
 export default {
   register,
+  verify,
+  resendEmail,
   login,
   current,
   logout,
